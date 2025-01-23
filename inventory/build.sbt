@@ -2,6 +2,7 @@ val TapirVersion      = "1.11.13"
 val ZioLoggingVersion = "2.4.0"
 val ZioTestVersion    = "2.1.14"
 val ZioConfigVersion  = "4.0.3"
+val QuillVersion      = "4.8.5"
 
 lazy val rootProject = (project in file(".")).settings(
   Seq(
@@ -20,6 +21,9 @@ lazy val rootProject = (project in file(".")).settings(
       "dev.zio"                       %% "zio-config"               % ZioConfigVersion,
       "dev.zio"                       %% "zio-config-typesafe"      % ZioConfigVersion,
       "dev.zio"                       %% "zio-config-magnolia"      % ZioConfigVersion,
+      "io.getquill"                   %% "quill-zio"                % QuillVersion,
+      "io.getquill"                   %% "quill-jdbc-zio"           % QuillVersion,
+      "org.postgresql"                 % "postgresql"               % "42.7.5",
       "com.softwaremill.sttp.tapir"   %% "tapir-sttp-stub-server"   % TapirVersion   % Test,
       "dev.zio"                       %% "zio-test"                 % ZioTestVersion % Test,
       "dev.zio"                       %% "zio-test-sbt"             % ZioTestVersion % Test,
