@@ -10,7 +10,7 @@ case class Product(
   initialStock: Int,
   currentStock: Int,
   price: Double,
-  isAvailable: Boolean,
+  isAvailable: Boolean = true,
   createdAt: LocalDateTime = LocalDateTime.now(),
   updatedAt: LocalDateTime = LocalDateTime.now()
 )
