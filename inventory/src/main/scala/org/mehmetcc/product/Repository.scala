@@ -15,6 +15,8 @@ trait Repository {
   def update(sku: String, updatedProduct: Product): IO[SQLException, Int]
 
   def delete(sku: String): IO[SQLException, Int]
+
+  def isAvailable(sku: String): IO[SQLException, Boolean]
 }
 
 object Repository {
@@ -29,6 +31,9 @@ object Repository {
 
   def delete(sku: String): ZIO[Repository, SQLException, Int] =
     ZIO.serviceWithZIO[Repository](_.delete(sku))
+
+  def isAvailable(sku: String): ZIO[Repository, SQLException, Boolean] =
+    ZIO.serviceWithZIO[Repository](_.isAvailable(sku))
 }
 
 final case class RepositoryImpl(source: Quill.Postgres[SnakeCase]) extends Repository {
@@ -59,6 +64,12 @@ final case class RepositoryImpl(source: Quill.Postgres[SnakeCase]) extends Repos
       query[Product].filter(_.sku == lift(sku)).delete
     }
   }.map(_.toInt)
+
+  override def isAvailable(sku: String): IO[SQLException, Boolean] = run {
+    query[Product]
+      .filter(_.sku == lift(sku))
+      .map(_.isAvailable)
+  }.map(_.headOption.getOrElse(false))
 }
 
 object RepositoryImpl {
