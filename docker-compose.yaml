@@ -1,7 +1,7 @@
 services:
   orderdb:
     image: postgres:15
-    container_name: postgres
+    container_name: orderdb
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespw
@@ -10,6 +10,13 @@ services:
       - "5432:5432"
     volumes:
       - order_db_data:/var/lib/postgresql/data
+    command: >
+      postgres
+        -c wal_level=logical
+        -c max_wal_senders=10
+        -c max_replication_slots=10
+    networks:
+      - kafka-network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -21,6 +28,9 @@ services:
       - "8081:80"
     depends_on:
       - orderdb
+    networks:
+      - kafka-network
+
   zookeeper:
     image: bitnami/zookeeper:latest
     # to survive the container restart
@@ -113,6 +123,31 @@ services:
     networks:
       - kafka-network
 
+  debezium:
+    platform: linux/x86_64 # to avoid complications that might arise due to apple silicon incompatibilities
+    image: debezium/connect:2.2
+    container_name: debezium
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - orderdb
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9093,kafka3:9094
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: debezium_configs
+      OFFSET_STORAGE_TOPIC: debezium_offsets
+      STATUS_STORAGE_TOPIC: debezium_statuses
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECTOR_CLIENT_POLICY: "All"
+    networks:
+      - kafka-network
+
 volumes:
   kafka_data1:
     driver: local
@@ -124,3 +159,4 @@ volumes:
 
 networks:
   kafka-network:
+    driver: bridge

@@ -23,7 +23,6 @@ func NewOrderService(db *gorm.DB) *OrderService {
 func (s *OrderService) CreateOrder(ctx context.Context, req dto.CreateOrderRequest) error {
 	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		order := models.Order{
-			OrderID:  req.OrderID,
 			ItemID:   req.ItemID,
 			Quantity: req.Quantity,
 			Status:   models.OrderStatusPending,
@@ -34,7 +33,7 @@ func (s *OrderService) CreateOrder(ctx context.Context, req dto.CreateOrderReque
 		}
 
 		eventPayload := map[string]interface{}{
-			"orderId":  req.OrderID,
+			"orderId":  order.ID,
 			"itemId":   req.ItemID,
 			"quantity": req.Quantity,
 		}
