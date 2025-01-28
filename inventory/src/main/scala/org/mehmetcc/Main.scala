@@ -3,7 +3,7 @@ package org.mehmetcc
 import org.mehmetcc.event.{Consumer, ConsumerImpl}
 import org.mehmetcc.infrastructure.Configuration
 import org.mehmetcc.infrastructure.QuillContext.QuillContext
-import org.mehmetcc.product.{RepositoryImpl, Server, ServerImpl, ServiceImpl}
+import org.mehmetcc.product.{RepositoryImpl, Server, ServerImpl}
 import zio._
 import zio.logging.LogFormat
 import zio.logging.backend.SLF4J
@@ -20,7 +20,6 @@ object Main extends ZIOAppDefault {
   override def run: Task[ExitCode] = program.provide(
     Configuration.live,
     ServerImpl.live,
-    ServiceImpl.live,
     RepositoryImpl.live,
     ConsumerImpl.live,
     QuillContext
