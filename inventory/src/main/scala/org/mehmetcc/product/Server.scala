@@ -34,9 +34,10 @@ object ServerImpl {
   val live: URLayer[Repository with Configuration, ServerImpl] = ZLayer {
     for {
       configuration <- ZIO.service[Configuration]
+      port           = configuration.application.port
       repository    <- ZIO.service[Repository]
       endpoints      = Endpoints(repository)
-    } yield ServerImpl(configuration.port, endpoints)
+    } yield ServerImpl(port, endpoints)
   }
 }
 
