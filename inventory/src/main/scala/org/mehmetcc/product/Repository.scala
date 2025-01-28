@@ -2,6 +2,7 @@ package org.mehmetcc.product
 
 import io.getquill.SnakeCase
 import io.getquill.jdbczio.Quill
+import org.mehmetcc.infrastructure.QuillContext.QuillContext
 import zio._
 
 import java.sql.SQLException

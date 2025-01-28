@@ -56,3 +56,7 @@ After that, run the following command:
 ```bash
 docker run -it --user root inventory:0.1.0-SNAPSHOT
 ```
+
+## Documentation
+
+An API documentation resides under [here](http://localhost:9990/docs/)

@@ -9,12 +9,29 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - order_db_data:/var/lib/postgresql/data
+      - orderdb_data:/var/lib/postgresql/data
     command: >
       postgres
         -c wal_level=logical
         -c max_wal_senders=10
         -c max_replication_slots=10
+    networks:
+      - kafka-network
+
+  inventorydb:
+    image: postgres:15
+    container_name: inventorydb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespw
+      POSTGRES_DB: inventorydb
+    expose:
+    - "5433"
+    ports:
+      - "5433:5433"
+    volumes:
+      - inventorydb_data:/var/lib/postgresql/data
+    command: -p 5433
     networks:
       - kafka-network
 
@@ -155,7 +172,8 @@ volumes:
     driver: local
   kafka_data3:
     driver: local
-  order_db_data:
+  orderdb_data:
+  inventorydb_data:
 
 networks:
   kafka-network:

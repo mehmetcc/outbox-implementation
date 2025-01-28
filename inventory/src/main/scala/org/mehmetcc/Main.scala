@@ -1,8 +1,7 @@
 package org.mehmetcc
 
-import io.getquill.SnakeCase
-import io.getquill.jdbczio.Quill
 import org.mehmetcc.infrastructure.Configuration
+import org.mehmetcc.infrastructure.QuillContext.QuillContext
 import org.mehmetcc.product.{RepositoryImpl, Server, ServerImpl}
 import zio._
 import zio.logging.LogFormat
@@ -15,7 +14,6 @@ object Main extends ZIOAppDefault {
     Configuration.live,
     ServerImpl.live,
     RepositoryImpl.live,
-    Quill.Postgres.fromNamingStrategy(SnakeCase),
-    Quill.DataSource.fromPrefix("database-configuration")
+    QuillContext
   )
 }

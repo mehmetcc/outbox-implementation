@@ -16,7 +16,7 @@ object Configuration {
         .withConfigProvider(TypesafeConfigProvider.fromResourcePath())
         .tap { config =>
           ZIO.logInfo(s"""
-                         |k-tail server configuration:
+                         |server configuration:
                          |port: ${config.port}
                          |""".stripMargin)
         }
