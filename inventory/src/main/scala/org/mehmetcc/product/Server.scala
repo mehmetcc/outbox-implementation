@@ -31,18 +31,19 @@ final case class ServerImpl(port: Int, endpoints: Endpoints) extends Server {
 }
 
 object ServerImpl {
-  val live: URLayer[Repository with Configuration, ServerImpl] = ZLayer {
+  val live: URLayer[Service with Configuration, ServerImpl] = ZLayer {
     for {
       configuration <- ZIO.service[Configuration]
       port           = configuration.application.port
-      repository    <- ZIO.service[Repository]
-      endpoints      = Endpoints(repository)
+      service       <- ZIO.service[Service]
+      endpoints      = Endpoints(service)
     } yield ServerImpl(port, endpoints)
   }
 }
 
-final case class Endpoints(repository: Repository) {
+final case class Endpoints(service: Service) {
   import Product._
+
   // Health endpoint
   val health: ZServerEndpoint[Any, Any] =
     endpoint.get.in("health").serverLogicSuccess(_ => ZIO.unit)
@@ -55,7 +56,7 @@ final case class Endpoints(repository: Repository) {
       .out(stringBody)
       .errorOut(stringBody)
       .zServerLogic { product =>
-        repository.create(product).mapError(_.getMessage)
+        service.create(product).mapError(_.getMessage)
       }
 
   // Read endpoint
@@ -65,7 +66,7 @@ final case class Endpoints(repository: Repository) {
       .out(jsonBody[Option[Product]])
       .errorOut(stringBody)
       .zServerLogic { sku =>
-        repository.read(sku).mapError(_.getMessage)
+        service.get(sku).mapError(_.getMessage)
       }
 
   // Update endpoint
@@ -76,7 +77,7 @@ final case class Endpoints(repository: Repository) {
       .out(jsonBody[Int])
       .errorOut(stringBody)
       .zServerLogic { case (sku, updatedProduct) =>
-        repository.update(sku, updatedProduct).mapError(_.getMessage)
+        service.update(sku, updatedProduct).mapError(_.getMessage)
       }
 
   // Delete endpoint
@@ -86,10 +87,20 @@ final case class Endpoints(repository: Repository) {
       .out(jsonBody[Int])
       .errorOut(stringBody)
       .zServerLogic { sku =>
-        repository.delete(sku).mapError(_.getMessage)
+        service.delete(sku).mapError(_.getMessage)
       }
 
-  val api: List[ZServerEndpoint[Any, Any]] = List(health, create, read, update, delete)
+  // Check availability endpoint
+  val isAvailable: ZServerEndpoint[Any, Any] =
+    endpoint.get
+      .in("products" / path[String]("sku") / "availability")
+      .out(jsonBody[Boolean])
+      .errorOut(stringBody)
+      .zServerLogic { sku =>
+        service.isAvailable(sku).mapError(_.getMessage)
+      }
+
+  val api: List[ZServerEndpoint[Any, Any]] = List(health, create, read, update, delete, isAvailable)
 
   // Swagger
   val documentation: List[ZServerEndpoint[Any, Any]] =
